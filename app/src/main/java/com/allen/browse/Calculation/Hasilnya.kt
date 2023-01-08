@@ -24,9 +24,8 @@ class Hasilnya:AppCompatActivity() {
         binding = HasilBinding.inflate(layoutInflater)
         setContentView(binding.root)
         val getter: ArrayList<*> = intent.getSerializableExtra("Transfers") as ArrayList<*>
-        val getterX:ArrayList<*> = intent.getSerializableExtra("TransfersX") as ArrayList<Double>
+        val getterX:ArrayList<*> = intent.getSerializableExtra("TransfersX") as ArrayList<*>
         val getterY = intent.getSerializableExtra("TransfersY") as ArrayList<*>
-        val data = getter
         val adapter = ResultAdapter(getter as ArrayList<Double>, getterX as ArrayList<Double>, getterY as ArrayList<Double>)
         binding.apply {
             myrecycle.adapter = adapter
