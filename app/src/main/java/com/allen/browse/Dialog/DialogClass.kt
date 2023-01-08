@@ -17,7 +17,7 @@ class DialogClass:DialogFragment() {
             builder.setTitle("Perizinan Penyimpanan")
             builder.setMessage("Perizinan untuk Penyimpanan Storage Diperlukan")
                     .setPositiveButton("Izinkan", DialogInterface.OnClickListener { dialog, which ->
-                        val izinkan = (activity as MainActivity).setupIzin()
+                        val izinkan = (activity as MainActivity).setupPermission()
                         val get = (activity as MainActivity)
                         Toast.makeText(context?.applicationContext, "Diizinkan", Toast.LENGTH_SHORT).show()
                     })

@@ -14,13 +14,32 @@ import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.text.TextUtils
 import android.widget.Toast
+import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.FloatingActionButton
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.ViewModelProvider
 import com.allen.browse.Calculation.Hasilnya
 import com.allen.browse.Data.VM
 import com.allen.browse.Dialog.DialogClass
@@ -31,12 +50,11 @@ import kotlin.math.pow
 class MainActivity : AppCompatActivity() {
     var izinstate = 0
     private val reCode = 200
-    private lateinit var VMget: VM
-    private lateinit var binding: ActivityMainBinding
+    private val VMget: VM by viewModels()
+    /*  private lateinit var binding: ActivityMainBinding*/
 
     @RequiresApi(Build.VERSION_CODES.N)
     fun calculation() {
-        VMget = ViewModelProvider(this).get(VM::class.java)
         val dx = VMget.dx
         val dy = VMget.dy
         //mencari mean
@@ -68,15 +86,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        VMget = ViewModelProvider(this).get(VM::class.java)
         super.onCreate(savedInstanceState)
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        setContent {
+            MainDisplay()
+        }
+        /* binding = ActivityMainBinding.inflate(layoutInflater)*/
+        /*setContentView(binding.root)*/
         val intens = Intent(Intent.ACTION_GET_CONTENT)
         intens.addCategory(Intent.CATEGORY_OPENABLE)
         intens.type = "text/*"
         setupPermission()
-        binding.apply {
+        /*binding.apply {
             access.setOnClickListener {
                 if (izinstate != 1) {
                     val dialog = DialogClass().show(supportFragmentManager, "")
@@ -85,22 +105,19 @@ class MainActivity : AppCompatActivity() {
                 }
 
             }
-        }
+        }*/
     }
 
     @RequiresApi(Build.VERSION_CODES.N)
     fun getdata(x: Uri?) {
-        VMget = ViewModelProvider(this).get(VM::class.java)
         val dx = VMget.dx
         val dy = VMget.dy
-        binding.apply {
-            val selectedPath = x?.let { getRealPath(this@MainActivity, it) }
-            val fileku = File("$selectedPath")
-            fileku.forEachLine {
-                val split = it.split(",")
-                dx.add(split[0].toDouble())
-                dy.add(split[1].toDouble())
-            }
+        val selectedPath = x?.let { getRealPath(this@MainActivity, it) }
+        val fileku = File("$selectedPath")
+        fileku.forEachLine {
+            val split = it.split(",")
+            dx.add(split[0].toDouble())
+            dy.add(split[1].toDouble())
         }
         calculation()
         val transfer = arrayListOf<Double>()
@@ -123,7 +140,6 @@ class MainActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == 111) {
             val datawhole = data?.data
-            val selected = data?.data?.path
             datawhole?.let {
                 getdata(it)
             }
@@ -131,7 +147,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     // Perizinan
-    private fun setupPermission() {
+    fun setupPermission() {
         val izin =
             ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
         if (izin != PackageManager.PERMISSION_GRANTED) {
@@ -289,7 +305,38 @@ class MainActivity : AppCompatActivity() {
 
 @Composable
 fun MainDisplay() {
-
+    val context = LocalContext.current
+    Scaffold(topBar = {
+        TopAppBar(title = {
+            Text(text = stringResource(R.string.app_title))
+        })
+    }, floatingActionButton = {
+        FloatingActionButton(onClick = {
+            Toast.makeText(
+                context,
+                "Tekan pada tombol diatas untuk import data .csv",
+                Toast.LENGTH_SHORT
+            ).show()
+        }) {
+            Image(
+                painter = painterResource(id = R.drawable.ic_question),
+                contentDescription = ""
+            )
+        }
+    }, content = {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(it),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.ic_storage),
+                contentDescription = "", modifier = Modifier.size(100.dp)
+            )
+        }
+    })
 }
 
 @Preview(showSystemUi = true, showBackground = true)
